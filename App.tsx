@@ -1,16 +1,4 @@
 // App.tsx
-// CriptoNow - App completo em um único arquivo (TypeScript)
-// ---------------------------------------------------------
-// Requisitos atendidos:
-// - React Native + Expo (TypeScript)
-// - StyleSheet para estilos
-// - Drawer navigation + Tabs + Modal
-// - 5+ módulos Expo: expo-status-bar, expo-constants, expo-font, expo-notifications, expo-secure-store
-// - Consumo API pública: CoinGecko
-// - AsyncStorage para persistência local (carteira simulada / favoritos)
-// - Gráficos com react-native-chart-kit
-// - Comentários explicativos para cada parte
-// ---------------------------------------------------------
 
 import React, { useEffect, useState, useCallback } from "react";
 import {
@@ -77,18 +65,18 @@ type Position = {
   timestamp: number;
 };
 
-// ---------- Constantes ----------
+//Constantes 
 const COINGECKO_BASE = "https://api.coingecko.com/api/v3";
 const STORAGE_POSITIONS = "@criptonow:positions";
 const STORAGE_FAVORITES = "@criptonow:favorites";
 const SCREEN_WIDTH = Dimensions.get("window").width;
 
-// ---------- Navegação ----------
+// Navegação 
 const Drawer = createDrawerNavigator();
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
-// ---------- App principal ----------
+// App principal 
 export default function App() {
   // load fonts (expo-font)
   const [fontsLoaded, setFontsLoaded] = useState(false);
@@ -96,16 +84,16 @@ export default function App() {
   useEffect(() => {
     (async () => {
       await Font.loadAsync({
-        // fontes custom — se quiser adicionar assets/fonts, troque as strings
+
         "Inter-Black": require("./assets/fonts/Inter-Black.ttf"),
       }).catch(() => {
-        // se não tiver a fonte, continua com padrão
+       
       });
       setFontsLoaded(true);
     })();
   }, []);
 
-  // Registrar handler de notifications (somente para demonstrar uso do expo-notifications)
+  // demonstrar uso do expo-notifications
   useEffect(() => {
     Notifications.setNotificationHandler({
       handleNotification: async () => ({ shouldShowAlert: true, shouldPlaySound: false, shouldSetBadge: false }),
@@ -133,7 +121,7 @@ export default function App() {
   );
 }
 
-// ---------- Drawer (Root) ----------
+// Drawer 
 function MainDrawer() {
   return (
     <Drawer.Navigator
@@ -153,7 +141,7 @@ function MainDrawer() {
   );
 }
 
-// ---------- Stack para Home e detalhes (permite navegar para detalhes) ----------
+// Stack para Home e detalhes (permite navegar para detalhes)
 function HomeStack() {
   return (
     <Stack.Navigator screenOptions={{ headerStyle: { backgroundColor: "#030712" }, headerTintColor: "#fff" }}>
@@ -163,7 +151,7 @@ function HomeStack() {
   );
 }
 
-// ---------- Tabs: Todas / Favoritas ----------
+//Tabs: Todas / Favoritas
 function MarketsTabs() {
   return (
     <Tab.Navigator screenOptions={{ headerShown: false, tabBarStyle: { backgroundColor: "#071129" }, tabBarActiveTintColor: "#60a5fa", tabBarInactiveTintColor: "#94a3b8" }}>
@@ -173,11 +161,11 @@ function MarketsTabs() {
   );
 }
 
-// =========================
-// ====== Screens =========
-// =========================
 
-// ---------- HomeScreen ----------
+// ====== TELAS =========
+
+
+//Home
 function HomeScreen({ navigation }: any) {
   const [topCoins, setTopCoins] = useState<Coin[]>([]);
   const [loading, setLoading] = useState(false);
@@ -222,7 +210,7 @@ function HomeScreen({ navigation }: any) {
   );
 }
 
-// ---------- MarketsScreen (usada para duas tabs - todas e favoritas) ----------
+// todas/favoritas
 function MarketsScreen({ navigation, route }: any) {
   const favoritesOnly = route?.params?.favoritesOnly ?? false;
   const [coins, setCoins] = useState<Coin[]>([]);
@@ -238,7 +226,7 @@ function MarketsScreen({ navigation, route }: any) {
     })();
   }, []);
 
-  // buscar coins
+  // buscar moedas
   useEffect(() => {
     (async () => {
       setLoading(true);
@@ -297,7 +285,7 @@ function MarketsScreen({ navigation, route }: any) {
   );
 }
 
-// ---------- CoinDetailsScreen ----------
+//detalhes da moeda
 function CoinDetailsScreen({ route }: any) {
   const { id } = route.params;
   const [coin, setCoin] = useState<any | null>(null);
@@ -424,7 +412,7 @@ function CoinDetailsScreen({ route }: any) {
   );
 }
 
-// ---------- WalletScreen (Carteira simulada) ----------
+// Carteira simulada
 function WalletScreen() {
   const [positions, setPositions] = useState<Position[]>([]);
   const [loading, setLoading] = useState(false);
@@ -492,7 +480,7 @@ function WalletScreen() {
   );
 }
 
-// ---------- ProfileScreen ----------
+// Tela do perfil
 function ProfileScreen() {
   const [expoId, setExpoId] = useState<string | null>(null);
 
@@ -517,11 +505,11 @@ function ProfileScreen() {
   );
 }
 
-// =========================
+// 
 // ====== Components =======
-// =========================
+// 
 
-// Card simples para exibir moeda na lista
+// Card para exibir moeda na lista
 function CoinCard({ coin, onPress, onFavorite, favorite }: { coin: Coin; onPress?: () => void; onFavorite?: () => void; favorite?: boolean }) {
   const up = coin.price_change_percentage_24h >= 0;
   return (
@@ -574,9 +562,9 @@ function PriceChart({ data }: { data: number[] }) {
   );
 }
 
-// =========================
+
 // ====== Utilitários ======
-// =========================
+
 
 function numberToBRL(num: number) {
   try {
@@ -595,9 +583,9 @@ function formatShortNumber(num: number) {
   return num.toString();
 }
 
-// =========================
-// ====== Estilos =========
-// =========================
+
+// *Estilos*
+
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#030712" },
