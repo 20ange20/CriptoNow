@@ -1,4 +1,6 @@
 // App.tsx
+import 'react-native-gesture-handler';
+import 'react-native-reanimated';
 
 import React, { useEffect, useState, useCallback } from "react";
 import {
@@ -19,14 +21,19 @@ import {
 } from "react-native";
 
 // Navigation
-import { NavigationContainer, DefaultTheme, DarkTheme } from "@react-navigation/native";
+import { DefaultTheme, DarkTheme } from "@react-navigation/native";
+// Se você não usar o DefaultTheme e DarkTheme, remova-os também.
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 // Expo modules (>=5 used)
+
+
+// Adicione esta importação (se não estiver lá) ou verifique se ela existe:
+import { TimeIntervalTriggerInput } from 'expo-notifications';
 import { StatusBar } from "expo-status-bar"; // expo-status-bar
-import Constants from "expo-constants"; // expo-constants
+import Constants from 'expo-constants'; // A maioria das propriedades está aqui
 import * as Font from "expo-font"; // expo-font
 import * as Notifications from "expo-notifications"; // expo-notifications
 import * as SecureStore from "expo-secure-store"; // expo-secure-store
@@ -34,7 +41,7 @@ import * as Haptics from "expo-haptics"; // expo-haptics (opcional, mas incluíd
 import * as Clipboard from "expo-clipboard"; // expo-clipboard
 
 // Storage & HTTP
-import AsyncStorage from "@react-native-async-storage/async-storage"; // storage local
+import * as AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from "axios"; // requisições
 
 // Charts
@@ -85,7 +92,7 @@ export default function App() {
     (async () => {
       await Font.loadAsync({
 
-        "Inter-Black": require("./assets/fonts/Inter-Black.ttf"),
+        "Inter-Black": require("../assets/fonts/Inter-Black.ttf"),
       }).catch(() => {
        
       });
@@ -96,7 +103,7 @@ export default function App() {
   // demonstrar uso do expo-notifications
   useEffect(() => {
     Notifications.setNotificationHandler({
-      handleNotification: async () => ({ shouldShowAlert: true, shouldPlaySound: false, shouldSetBadge: false }),
+      handleNotification: async () => ({ shouldShowAlert: true, shouldPlaySound: false, shouldSetBadge: false, shouldShowBanner: true, shouldShowList: true  }),
     });
   }, []);
 
@@ -112,10 +119,7 @@ export default function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <NavigationContainer theme={DarkTheme}>
-          <StatusBar style="light" />
-          <MainDrawer />
-        </NavigationContainer>
+    
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
@@ -341,7 +345,13 @@ function CoinDetailsScreen({ route }: any) {
         title: "Posição adicionada (simulada)",
         body: `${position.quantity}x ${position.name} a R$ ${position.entryPrice}`,
       },
-      trigger: { seconds: 2 },
+
+ trigger: { 
+  type: 'timeInterval', 
+  seconds: 2, 
+  repeats: false // Lembre-se de incluir esta propriedade para o tipo TimeIntervalTriggerInput.
+} as Notifications.TimeIntervalTriggerInput, 
+// ^-- Usa um 'Type Assertion' para forçar a tipagem correta.
     });
     Alert.alert("Confirmado", "Posição simulada adicionada à carteira local.");
   };
@@ -624,5 +634,13 @@ const styles = StyleSheet.create({
   modalBox: { width: "90%", backgroundColor: "#f8fafc", borderRadius: 12, padding: 16 },
   modalBtn: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8, marginLeft: 8, backgroundColor: "#e2e8f0" },
   positionRow: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: "#071129" },
+
+  largePrice: { 
+    fontSize: 40,             // Escolha o tamanho de fonte desejado
+    fontWeight: 'bold',       // Escolha o peso da fonte desejado
+    color: '#333',            // Escolha a cor desejada
+    marginTop: 10,
+    marginBottom: 5,
+  },
 });
 
