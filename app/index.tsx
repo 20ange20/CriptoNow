@@ -36,7 +36,10 @@ import { TimeIntervalTriggerInput } from 'expo-notifications';
 import { StatusBar } from "expo-status-bar"; // expo-status-bar
 import Constants from 'expo-constants';
 
-const appId = Constants?.expoConfig?.slug ?? Constants?.manifest?.slug ?? 'unknown';
+const appId =
+  Constants.expoConfig?.slug ??
+  (Constants.manifest as any)?.slug ??
+  'unknown';
 
 import * as Font from "expo-font"; // expo-font
 import * as Notifications from "expo-notifications"; // expo-notifications
@@ -576,7 +579,8 @@ function ProfileScreen() {
   // demonstrar uso de Constants + SecureStore
   useEffect(() => {
     (async () => {
-      setExpoId(Constants.expoConfig?.slug ?? Constants.manifest?.slug ?? "unknown");
+setExpoId(Constants.expoConfig?.slug ?? "unknown");
+
     })();
   }, []);
 
