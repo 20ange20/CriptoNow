@@ -146,7 +146,7 @@ const Stack = createNativeStackNavigator();
 
 // Estado para fonts
 const [fontsLoaded, setFontsLoaded] = useState<boolean>(false);
-
+/*
 // carregar fontes (opcional)
 useEffect(() => {
   (async () => {
@@ -196,10 +196,10 @@ if (!fontsLoaded) {
 return (
   <GestureHandlerRootView style={{ flex: 1 }}>
     <SafeAreaProvider>
-      {/* resto do seu componente: NavigationContainer / Drawer / Screens */}
-    </SafeAreaProvider>
-  </GestureHandlerRootView>
-);
+      {/* resto do seu componente: NavigationContainer / Drawer / Screens */
+  //  </SafeAreaProvider>
+ //// </GestureHandlerRootView>
+//);
 
 // --- fim do trecho substituído ---
 
