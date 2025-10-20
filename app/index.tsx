@@ -119,14 +119,7 @@ type Coin = {
   price_change_percentage_24h: number;
 };
 
-type Position = {
-  id: string;
-  name: string;
-  symbol: string;
-  quantity: number;
-  entryPrice: number;
-  timestamp: number;
-};
+
 
 //Constantes 
 const COINGECKO_BASE = "https://api.coingecko.com/api/v3";
@@ -149,23 +142,67 @@ const Stack = createNativeStackNavigator();
     });
   }, []);
 
-  if (!fontsLoaded) {
-    return (
-      <SafeAreaView style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
-        <ActivityIndicator size="large" />
-        <Text style={{ marginTop: 8, color: "#94a3b8" }}>Carregando fontes...</Text>
-      </SafeAreaView>
-    );
-  }
+// --- substituir trecho dentro do componente (ex.: App ou Index) ---
 
+// Estado para fonts
+const [fontsLoaded, setFontsLoaded] = useState<boolean>(false);
+
+// carregar fontes (opcional)
+useEffect(() => {
+  (async () => {
+    try {
+      // Se você tiver a fonte em assets/fonts, descomente e ajuste:
+      // await Font.loadAsync({ 'Inter-Black': require('../assets/fonts/Inter-Black.ttf') });
+    } catch (e) {
+      // ignora erro de fonte
+      console.warn('Erro ao carregar fonte:', e);
+    } finally {
+      setFontsLoaded(true);
+    }
+  })();
+}, []);
+
+// exemplo seguro de uso de expo-notifications (comentado se não usar)
+// se você estiver rodando no Expo Go e não tiver dev build, comente o bloco abaixo
+useEffect(() => {
+  try {
+    // se Notifications não estiver importado no topo, comente este bloco
+    // Notifications.setNotificationHandler({
+    //   handleNotification: async () => ({
+    //     shouldShowAlert: true,
+    //     shouldPlaySound: false,
+    //     shouldSetBadge: false,
+    //     shouldShowBanner: true,
+    //     shouldShowList: true,
+    //   }),
+    // });
+  } catch (e) {
+    // evita quebrar se Notifications não existir no ambiente atual
+    console.warn('Notifications handler skipped:', e);
+  }
+}, []);
+
+// Se as fontes ainda não estiverem carregadas, renderiza loading
+if (!fontsLoaded) {
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaProvider>
-    
-      </SafeAreaProvider>
-    </GestureHandlerRootView>
+    <SafeAreaView style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+      <ActivityIndicator size="large" />
+      <Text style={{ marginTop: 8, color: '#94a3b8' }}>Carregando fontes...</Text>
+    </SafeAreaView>
   );
 }
+
+// Render principal (assegure que está fechado corretamente)
+return (
+  <GestureHandlerRootView style={{ flex: 1 }}>
+    <SafeAreaProvider>
+      {/* resto do seu componente: NavigationContainer / Drawer / Screens */}
+    </SafeAreaProvider>
+  </GestureHandlerRootView>
+);
+
+// --- fim do trecho substituído ---
+
 
 // Drawer 
 function MainDrawer() {
