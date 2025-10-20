@@ -45,10 +45,58 @@ import * as Haptics from "expo-haptics"; // expo-haptics (opcional, mas incluíd
 import * as Clipboard from "expo-clipboard"; // expo-clipboard
 
 // Storage & HTTP
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-await AsyncStorage.setItem('@criptonow:positions', JSON.stringify(positions));
-const s = await AsyncStorage.getItem('@criptonow:positions'); // retorna string | null
+type Position = {
+  id: string;
+  name: string;
+  symbol: string;
+  quantity: number;
+  entryPrice: number;
+  timestamp: number;
+};
+
+export default function WalletLikeComponent() {
+  const [positions, setPositions] = useState<Position[]>([]);
+  const STORAGE_POSITIONS = '@criptonow:positions';
+
+  // carregar posições quando o componente montar
+  useEffect(() => {
+    (async () => {
+      try {
+        const s = await AsyncStorage.getItem(STORAGE_POSITIONS);
+        if (s) {
+          setPositions(JSON.parse(s));
+        }
+      } catch (err) {
+        console.warn('Erro ao carregar posições', err);
+      }
+    })();
+  }, []);
+
+  // função para salvar posições (chame quando quiser salvar)
+  const savePositions = async (newPositions: Position[]) => {
+    try {
+      await AsyncStorage.setItem(STORAGE_POSITIONS, JSON.stringify(newPositions));
+      setPositions(newPositions);
+    } catch (err) {
+      console.warn('Erro ao salvar posições', err);
+    }
+  };
+
+  // Exemplo: adicionar uma posição (simulada)
+  const addPosition = async (pos: Position) => {
+    const updated = [...positions, pos];
+    await savePositions(updated);
+  };
+
+  return (
+    // sua UI aqui...
+    null
+  );
+}
+
 
 import axios from "axios"; // requisições
 
@@ -92,21 +140,7 @@ const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
 // App principal 
-export default function App() {
-  // load fonts (expo-font)
-  const [fontsLoaded, setFontsLoaded] = useState(false);
 
-  useEffect(() => {
-    (async () => {
-      await Font.loadAsync({
-
-        "Inter-Black": require("../assets/fonts/Inter-Black.ttf"),
-      }).catch(() => {
-       
-      });
-      setFontsLoaded(true);
-    })();
-  }, []);
 
   // demonstrar uso do expo-notifications
   useEffect(() => {
