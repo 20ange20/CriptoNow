@@ -2,6 +2,7 @@
 import 'react-native-gesture-handler';
 import 'react-native-reanimated';
 
+
 import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
@@ -33,7 +34,10 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 // Adicione esta importação (se não estiver lá) ou verifique se ela existe:
 import { TimeIntervalTriggerInput } from 'expo-notifications';
 import { StatusBar } from "expo-status-bar"; // expo-status-bar
-import Constants from 'expo-constants'; // A maioria das propriedades está aqui
+import Constants from 'expo-constants';
+
+const appId = Constants?.expoConfig?.slug ?? Constants?.manifest?.slug ?? 'unknown';
+
 import * as Font from "expo-font"; // expo-font
 import * as Notifications from "expo-notifications"; // expo-notifications
 import * as SecureStore from "expo-secure-store"; // expo-secure-store
@@ -41,7 +45,11 @@ import * as Haptics from "expo-haptics"; // expo-haptics (opcional, mas incluíd
 import * as Clipboard from "expo-clipboard"; // expo-clipboard
 
 // Storage & HTTP
-import * as AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+await AsyncStorage.setItem('@criptonow:positions', JSON.stringify(positions));
+const s = await AsyncStorage.getItem('@criptonow:positions'); // retorna string | null
+
 import axios from "axios"; // requisições
 
 // Charts
