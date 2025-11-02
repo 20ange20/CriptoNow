@@ -1,8 +1,7 @@
-// App / index.tsx — adaptado para rodar no web (Option A: ignorar Notifications/SecureStore no web)
+// index.tsx (corrigido — completo)
 import 'react-native-gesture-handler';
 import 'react-native-reanimated';
 import * as Clipboard from "expo-clipboard";
-
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -22,29 +21,21 @@ import {
   Platform,
 } from "react-native";
 
-// Navigation
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
-// Expo modules (usaremos imports dinâmicos quando necessário para evitar que a build web quebre)
-import { StatusBar } from "expo-status-bar"; // expo-status-bar
+import { StatusBar } from "expo-status-bar";
 import Constants from 'expo-constants';
-
-const appId =
-  Constants.expoConfig?.slug ??
-  (Constants.manifest as any)?.slug ??
-  'unknown';
-
-import * as Font from "expo-font"; // expo-font
-import { NavigationContainer, DarkTheme } from "@react-navigation/native";
-// NOTA: expo-notifications e expo-secure-store foram removidos dos imports estáticos para não quebrar a web
-// import * as Notifications from "expo-notifications";
-// import * as SecureStore from "expo-secure-store";
-
-// Storage & HTTP
+import * as Font from "expo-font";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { NavigationContainer, DarkTheme } from "@react-navigation/native";
+import axios from "axios";
+import { LineChart } from "react-native-chart-kit";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
+// ---------- Tipagens ----------
 type Position = {
   id: string;
   name: string;
@@ -54,53 +45,6 @@ type Position = {
   timestamp: number;
 };
 
-// Se você quiser renderizar um componente pequeno de carteira (apenas exemplo)
-export default function WalletLikeComponent() {
-  const [positions, setPositions] = useState<Position[]>([]);
-  const STORAGE_POSITIONS = '@criptonow:positions';
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const s = await AsyncStorage.getItem(STORAGE_POSITIONS);
-        if (s) {
-          setPositions(JSON.parse(s));
-        }
-      } catch (err) {
-        console.warn('Erro ao carregar posições', err);
-      }
-    })();
-  }, []);
-
-  const savePositions = async (newPositions: Position[]) => {
-    try {
-      await AsyncStorage.setItem(STORAGE_POSITIONS, JSON.stringify(newPositions));
-      setPositions(newPositions);
-    } catch (err) {
-      console.warn('Erro ao salvar posições', err);
-    }
-  };
-
-  const addPosition = async (pos: Position) => {
-    const updated = [...positions, pos];
-    await savePositions(updated);
-  };
-
-  // componente de placeholder — o seu App/Navigation real parece estar mais abaixo no arquivo original
-  return null;
-}
-
-import axios from "axios"; // requisições
-
-// Charts
-import { LineChart } from "react-native-chart-kit"; // gráfico (atenção: algumas versões podem precisar de polyfills no web)
-
-// Gesture and safe area (required by react-navigation)
-import "react-native-gesture-handler";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { SafeAreaProvider } from "react-native-safe-area-context";
-
-// ---------- Tipagens simples ----------
 type Coin = {
   id: string;
   symbol: string;
@@ -111,51 +55,26 @@ type Coin = {
   price_change_percentage_24h: number;
 };
 
-//Constantes 
+// ---------- Constantes ----------
 const COINGECKO_BASE = "https://api.coingecko.com/api/v3";
 const STORAGE_POSITIONS = "@criptonow:positions";
 const STORAGE_FAVORITES = "@criptonow:favorites";
 const SCREEN_WIDTH = Dimensions.get("window").width;
 
-// Navegação 
+// ---------- Navegação ----------
 const Drawer = createDrawerNavigator();
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
-// App principal  
-
-// --- substituir trecho dentro do componente (ex.: App ou Index) ---
-
-// Estado para fonts
-const [fontsLoaded, setFontsLoaded] = useState<boolean>(false);
-
-// carregar fontes (opcional)
-useEffect(() => {
-  (async () => {
-    try {
-      // await Font.loadAsync({ 'Inter-Black': require('../assets/fonts/Inter-Black.ttf') });
-    } catch (e) {
-      console.warn('Erro ao carregar fonte:', e);
-    } finally {
-      setFontsLoaded(true);
-    }
-  })();
-}, []);
-
-// Se as fontes ainda não estiverem carregadas, renderiza loading
-if (!fontsLoaded) {
-  // Nota: isso presume que este trecho está dentro de um componente — como o seu App principal.
-}
-
-// Render principal (assegure que está fechado corretamente)
-
+// ---------- App principal ----------
 function AppRoot() {
-  const [fontsLoaded, setFontsLoaded] = useState(false);
+  const [fontsLoaded, setFontsLoaded] = useState<boolean>(false);
 
-  // Carregar fontes
+  // Carregar fontes (opcional)
   useEffect(() => {
     (async () => {
       try {
+        // se quiser carregar fontes customizadas, descomente e adapte o path:
         // await Font.loadAsync({ 'Inter-Black': require('../assets/fonts/Inter-Black.ttf') });
       } catch (e) {
         console.warn('Erro ao carregar fonte:', e);
@@ -165,7 +84,7 @@ function AppRoot() {
     })();
   }, []);
 
-  // Configurar notificações (somente fora do web)
+  // Configurar expo-notifications somente em plataformas suportadas (não web)
   useEffect(() => {
     if (Platform.OS !== 'web') {
       (async () => {
@@ -207,9 +126,7 @@ function AppRoot() {
   );
 }
 
-// Observação: o arquivo original tem várias funções e telas. Este arquivo foi adaptado para evitar imports nativos no web.
-
-// Drawer 
+// ---------- Navegadores ----------
 function MainDrawer() {
   return (
     <Drawer.Navigator
@@ -229,7 +146,6 @@ function MainDrawer() {
   );
 }
 
-// Stack para Home e detalhes (permite navegar para detalhes)
 function HomeStack() {
   return (
     <Stack.Navigator screenOptions={{ headerStyle: { backgroundColor: "#030712" }, headerTintColor: "#fff" }}>
@@ -239,21 +155,25 @@ function HomeStack() {
   );
 }
 
-//Tabs: Todas / Favoritas
 function MarketsTabs() {
   return (
-    <Tab.Navigator screenOptions={{ headerShown: false, tabBarStyle: { backgroundColor: "#071129" }, tabBarActiveTintColor: "#60a5fa", tabBarInactiveTintColor: "#94a3b8" }}>
+    <Tab.Navigator
+      screenOptions={{
+        headerShown: false,
+        tabBarStyle: { backgroundColor: "#071129" },
+        tabBarActiveTintColor: "#60a5fa",
+        tabBarInactiveTintColor: "#94a3b8",
+      }}
+    >
       <Tab.Screen name="Todas" component={MarketsScreen} />
       <Tab.Screen name="Favoritas" component={MarketsScreen} initialParams={{ favoritesOnly: true }} />
     </Tab.Navigator>
   );
 }
 
-
 // ====== TELAS =========
 
-
-//Home
+// Home
 function HomeScreen({ navigation }: any) {
   const [topCoins, setTopCoins] = useState<Coin[]>([]);
   const [loading, setLoading] = useState(false);
@@ -298,7 +218,7 @@ function HomeScreen({ navigation }: any) {
   );
 }
 
-// todas/favoritas
+// Markets Screen
 function MarketsScreen({ navigation, route }: any) {
   const favoritesOnly = route?.params?.favoritesOnly ?? false;
   const [coins, setCoins] = useState<Coin[]>([]);
@@ -373,7 +293,7 @@ function MarketsScreen({ navigation, route }: any) {
   );
 }
 
-//detalhes da moeda
+// Coin Details Screen
 function CoinDetailsScreen({ route }: any) {
   const { id } = route.params;
   const [coin, setCoin] = useState<any | null>(null);
@@ -421,7 +341,7 @@ function CoinDetailsScreen({ route }: any) {
     setModalVisible(false);
     try { const Haptics = await import('expo-haptics'); Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); } catch(e) { /* ignore on web */ }
 
-    // agendar notificação somente em plataformas suportadas (não roda no web)
+    // agendar notificação somente em plataformas suportadas
     if (Platform.OS !== 'web') {
       try {
         const Notifications = await import('expo-notifications');
@@ -553,6 +473,7 @@ function WalletScreen() {
       <View style={{ padding: 16 }}>
         <Text style={styles.title}>Carteira Simulada</Text>
         <Text style={styles.subtitle}>Posições adicionadas localmente</Text>
+        <View style={{ height: 12 }} />
         {loading ? <ActivityIndicator style={{ marginTop: 12 }} /> : null}
 
         <View style={{ height: 12 }} />
@@ -612,7 +533,6 @@ function ProfileScreen() {
   );
 }
 
-// 
 // ====== Components =======
 
 // Card para exibir moeda na lista
@@ -667,9 +587,7 @@ function PriceChart({ data }: { data: number[] }) {
   );
 }
 
-
 // ====== Utilitários ======
-
 
 function numberToBRL(num: number) {
   try {
@@ -688,9 +606,7 @@ function formatShortNumber(num: number) {
   return num.toString();
 }
 
-
 // *Estilos*
-
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#030712" },
   title: { color: "#fff", fontSize: 22, fontWeight: "800" },
@@ -738,6 +654,5 @@ const styles = StyleSheet.create({
   },
 });
 
-import { registerRootComponent } from "expo";
-
-registerRootComponent(AppRoot);
+// Export default AppRoot para o entry point do Expo
+export default AppRoot;
