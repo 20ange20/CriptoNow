@@ -1,8 +1,7 @@
 // App / index.tsx — adaptado para rodar no web (Option A: ignorar Notifications/SecureStore no web)
 import 'react-native-gesture-handler';
 import 'react-native-reanimated';
-
-import * as Clipboard from "expo-clipboard";  
+import * as Clipboard from "expo-clipboard";
 
 import React, { useEffect, useState } from "react";
 import {
@@ -24,7 +23,6 @@ import {
 } from "react-native";
 
 // Navigation
-import { DefaultTheme, DarkTheme } from "@react-navigation/native";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -39,6 +37,7 @@ const appId =
   'unknown';
 
 import * as Font from "expo-font"; // expo-font
+import { NavigationContainer, DarkTheme } from "@react-navigation/native";
 // NOTA: expo-notifications e expo-secure-store foram removidos dos imports estáticos para não quebrar a web
 // import * as Notifications from "expo-notifications";
 // import * as SecureStore from "expo-secure-store";
@@ -125,22 +124,6 @@ const Stack = createNativeStackNavigator();
 
 // App principal  
 
-// demonstrar uso do expo-notifications — agora protegido para NÃO rodar no web
-useEffect(() => {
-  if (Platform.OS !== 'web') {
-    (async () => {
-      try {
-        const Notifications = await import('expo-notifications');
-        Notifications.setNotificationHandler({
-          handleNotification: async () => ({ shouldShowAlert: true, shouldPlaySound: false, shouldSetBadge: false, shouldShowBanner: true, shouldShowList: true  }),
-        });
-      } catch (e) {
-        console.warn('Não foi possível configurar expo-notifications (provavelmente em web):', e);
-      }
-    })();
-  }
-}, []);
-
 // --- substituir trecho dentro do componente (ex.: App ou Index) ---
 
 // Estado para fonts
@@ -165,6 +148,65 @@ if (!fontsLoaded) {
 }
 
 // Render principal (assegure que está fechado corretamente)
+
+function AppRoot() {
+  const [fontsLoaded, setFontsLoaded] = useState(false);
+
+  // Carregar fontes
+  useEffect(() => {
+    (async () => {
+      try {
+        // await Font.loadAsync({ 'Inter-Black': require('../assets/fonts/Inter-Black.ttf') });
+      } catch (e) {
+        console.warn('Erro ao carregar fonte:', e);
+      } finally {
+        setFontsLoaded(true);
+      }
+    })();
+  }, []);
+
+  // Configurar notificações (somente fora do web)
+  useEffect(() => {
+    if (Platform.OS !== 'web') {
+      (async () => {
+        try {
+          const Notifications = await import('expo-notifications');
+          Notifications.setNotificationHandler({
+            handleNotification: async () => ({
+              shouldShowAlert: true,
+              shouldPlaySound: false,
+              shouldSetBadge: false,
+              shouldShowBanner: true,
+              shouldShowList: true,
+            }),
+          });
+        } catch (e) {
+          console.warn('Não foi possível configurar expo-notifications (provavelmente em web):', e);
+        }
+      })();
+    }
+  }, []);
+
+  if (!fontsLoaded) {
+    return (
+      <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#60a5fa" />
+      </SafeAreaView>
+    );
+  }
+
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <StatusBar style="light" />
+        <NavigationContainer theme={DarkTheme}>
+          <MainDrawer />
+        </NavigationContainer>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
+  );
+}
+
 // Observação: o arquivo original tem várias funções e telas. Este arquivo foi adaptado para evitar imports nativos no web.
 
 // Drawer 
@@ -695,3 +737,7 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
 });
+
+import { registerRootComponent } from "expo";
+
+registerRootComponent(AppRoot);
