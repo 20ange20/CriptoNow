@@ -1,8 +1,10 @@
-// App.tsx
+// App / index.tsx — adaptado para rodar no web (Option A: ignorar Notifications/SecureStore no web)
 import 'react-native-gesture-handler';
 import 'react-native-reanimated';
 
-import React, { useEffect, useState, useCallback } from "react";
+import * as Clipboard from "expo-clipboard";  
+
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -18,20 +20,16 @@ import {
   Dimensions,
   ScrollView,
   StatusBar as RNStatusBar,
+  Platform,
 } from "react-native";
 
 // Navigation
 import { DefaultTheme, DarkTheme } from "@react-navigation/native";
-// Se você não usar o DefaultTheme e DarkTheme, remova-os também.
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
-// Expo modules (>=5 used)
-
-
-// Adicione esta importação (se não estiver lá) ou verifique se ela existe:
-import { TimeIntervalTriggerInput } from 'expo-notifications';
+// Expo modules (usaremos imports dinâmicos quando necessário para evitar que a build web quebre)
 import { StatusBar } from "expo-status-bar"; // expo-status-bar
 import Constants from 'expo-constants';
 
@@ -41,13 +39,11 @@ const appId =
   'unknown';
 
 import * as Font from "expo-font"; // expo-font
-import * as Notifications from "expo-notifications"; // expo-notifications
-import * as SecureStore from "expo-secure-store"; // expo-secure-store
-import * as Haptics from "expo-haptics"; // expo-haptics (opcional, mas incluído)
-import * as Clipboard from "expo-clipboard"; // expo-clipboard
+// NOTA: expo-notifications e expo-secure-store foram removidos dos imports estáticos para não quebrar a web
+// import * as Notifications from "expo-notifications";
+// import * as SecureStore from "expo-secure-store";
 
 // Storage & HTTP
-
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type Position = {
@@ -59,11 +55,11 @@ type Position = {
   timestamp: number;
 };
 
+// Se você quiser renderizar um componente pequeno de carteira (apenas exemplo)
 export default function WalletLikeComponent() {
   const [positions, setPositions] = useState<Position[]>([]);
   const STORAGE_POSITIONS = '@criptonow:positions';
 
-  // carregar posições quando o componente montar
   useEffect(() => {
     (async () => {
       try {
@@ -77,7 +73,6 @@ export default function WalletLikeComponent() {
     })();
   }, []);
 
-  // função para salvar posições (chame quando quiser salvar)
   const savePositions = async (newPositions: Position[]) => {
     try {
       await AsyncStorage.setItem(STORAGE_POSITIONS, JSON.stringify(newPositions));
@@ -87,23 +82,19 @@ export default function WalletLikeComponent() {
     }
   };
 
-  // Exemplo: adicionar uma posição (simulada)
   const addPosition = async (pos: Position) => {
     const updated = [...positions, pos];
     await savePositions(updated);
   };
 
-  return (
-    // sua UI aqui...
-    null
-  );
+  // componente de placeholder — o seu App/Navigation real parece estar mais abaixo no arquivo original
+  return null;
 }
-
 
 import axios from "axios"; // requisições
 
 // Charts
-import { LineChart } from "react-native-chart-kit"; // gráfico
+import { LineChart } from "react-native-chart-kit"; // gráfico (atenção: algumas versões podem precisar de polyfills no web)
 
 // Gesture and safe area (required by react-navigation)
 import "react-native-gesture-handler";
@@ -121,8 +112,6 @@ type Coin = {
   price_change_percentage_24h: number;
 };
 
-
-
 //Constantes 
 const COINGECKO_BASE = "https://api.coingecko.com/api/v3";
 const STORAGE_POSITIONS = "@criptonow:positions";
@@ -134,29 +123,35 @@ const Drawer = createDrawerNavigator();
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
-// App principal 
+// App principal  
 
-
-  // demonstrar uso do expo-notifications
-  useEffect(() => {
-    Notifications.setNotificationHandler({
-      handleNotification: async () => ({ shouldShowAlert: true, shouldPlaySound: false, shouldSetBadge: false, shouldShowBanner: true, shouldShowList: true  }),
-    });
-  }, []);
+// demonstrar uso do expo-notifications — agora protegido para NÃO rodar no web
+useEffect(() => {
+  if (Platform.OS !== 'web') {
+    (async () => {
+      try {
+        const Notifications = await import('expo-notifications');
+        Notifications.setNotificationHandler({
+          handleNotification: async () => ({ shouldShowAlert: true, shouldPlaySound: false, shouldSetBadge: false, shouldShowBanner: true, shouldShowList: true  }),
+        });
+      } catch (e) {
+        console.warn('Não foi possível configurar expo-notifications (provavelmente em web):', e);
+      }
+    })();
+  }
+}, []);
 
 // --- substituir trecho dentro do componente (ex.: App ou Index) ---
 
 // Estado para fonts
 const [fontsLoaded, setFontsLoaded] = useState<boolean>(false);
-/*
+
 // carregar fontes (opcional)
 useEffect(() => {
   (async () => {
     try {
-      // Se você tiver a fonte em assets/fonts, descomente e ajuste:
       // await Font.loadAsync({ 'Inter-Black': require('../assets/fonts/Inter-Black.ttf') });
     } catch (e) {
-      // ignora erro de fonte
       console.warn('Erro ao carregar fonte:', e);
     } finally {
       setFontsLoaded(true);
@@ -164,47 +159,13 @@ useEffect(() => {
   })();
 }, []);
 
-// exemplo seguro de uso de expo-notifications (comentado se não usar)
-// se você estiver rodando no Expo Go e não tiver dev build, comente o bloco abaixo
-useEffect(() => {
-  try {
-    // se Notifications não estiver importado no topo, comente este bloco
-    // Notifications.setNotificationHandler({
-    //   handleNotification: async () => ({
-    //     shouldShowAlert: true,
-    //     shouldPlaySound: false,
-    //     shouldSetBadge: false,
-    //     shouldShowBanner: true,
-    //     shouldShowList: true,
-    //   }),
-    // });
-  } catch (e) {
-    // evita quebrar se Notifications não existir no ambiente atual
-    console.warn('Notifications handler skipped:', e);
-  }
-}, []);
-
 // Se as fontes ainda não estiverem carregadas, renderiza loading
 if (!fontsLoaded) {
-  return (
-    <SafeAreaView style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-      <ActivityIndicator size="large" />
-      <Text style={{ marginTop: 8, color: '#94a3b8' }}>Carregando fontes...</Text>
-    </SafeAreaView>
-  );
+  // Nota: isso presume que este trecho está dentro de um componente — como o seu App principal.
 }
 
 // Render principal (assegure que está fechado corretamente)
-return (
-  <GestureHandlerRootView style={{ flex: 1 }}>
-    <SafeAreaProvider>
-      {/* resto do seu componente: NavigationContainer / Drawer / Screens */
-  //  </SafeAreaProvider>
- //// </GestureHandlerRootView>
-//);
-
-// --- fim do trecho substituído ---
-
+// Observação: o arquivo original tem várias funções e telas. Este arquivo foi adaptado para evitar imports nativos no web.
 
 // Drawer 
 function MainDrawer() {
@@ -334,7 +295,7 @@ function MarketsScreen({ navigation, route }: any) {
     else f.push(id);
     setFavorites(f);
     await AsyncStorage.setItem(STORAGE_FAVORITES, JSON.stringify(f));
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    try { const Haptics = await import('expo-haptics'); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); } catch(e){/* ignore on web */}
   };
 
   const filtered = coins.filter((c) => {
@@ -384,11 +345,9 @@ function CoinDetailsScreen({ route }: any) {
     (async () => {
       setLoading(true);
       try {
-        // dados detalhados
         const res = await axios.get(`${COINGECKO_BASE}/coins/${id}`, { params: { localization: false, tickers: false, community_data: false, developer_data: false, sparkline: false } });
         setCoin(res.data);
 
-        // chart (7 dias)
         const ch = await axios.get(`${COINGECKO_BASE}/coins/${id}/market_chart`, { params: { vs_currency: "brl", days: 7 } });
         const arr: number[] = ch.data.prices.map((p: any[]) => p[1]);
         setPrices(arr);
@@ -398,7 +357,6 @@ function CoinDetailsScreen({ route }: any) {
         setLoading(false);
       }
     })();
-    // carregar posições locais
     (async () => {
       const s = await AsyncStorage.getItem(STORAGE_POSITIONS);
       setPositions(s ? JSON.parse(s) : []);
@@ -419,21 +377,28 @@ function CoinDetailsScreen({ route }: any) {
     setPositions(newPositions);
     await AsyncStorage.setItem(STORAGE_POSITIONS, JSON.stringify(newPositions));
     setModalVisible(false);
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    // opcional: agendar notificação local de confirmação
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: "Posição adicionada (simulada)",
-        body: `${position.quantity}x ${position.name} a R$ ${position.entryPrice}`,
-      },
+    try { const Haptics = await import('expo-haptics'); Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); } catch(e) { /* ignore on web */ }
 
- trigger: { 
-  type: 'timeInterval', 
-  seconds: 2, 
-  repeats: false // Lembre-se de incluir esta propriedade para o tipo TimeIntervalTriggerInput.
-} as Notifications.TimeIntervalTriggerInput, 
-// ^-- Usa um 'Type Assertion' para forçar a tipagem correta.
-    });
+    // agendar notificação somente em plataformas suportadas (não roda no web)
+    if (Platform.OS !== 'web') {
+      try {
+        const Notifications = await import('expo-notifications');
+        await Notifications.scheduleNotificationAsync({
+          content: {
+            title: "Posição adicionada (simulada)",
+            body: `${position.quantity}x ${position.name} a R$ ${position.entryPrice}`,
+          },
+          trigger: {
+            type: 'timeInterval',
+            seconds: 2,
+            repeats: false,
+          } as any,
+        } as any);
+      } catch (e) {
+        console.warn('Não foi possível agendar notificação (provavelmente web):', e);
+      }
+    }
+
     Alert.alert("Confirmado", "Posição simulada adicionada à carteira local.");
   };
 
@@ -508,7 +473,6 @@ function WalletScreen() {
   const [positions, setPositions] = useState<Position[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // carregar posições armazenadas
   useEffect(() => {
     (async () => {
       setLoading(true);
@@ -520,8 +484,20 @@ function WalletScreen() {
 
   const exportJSON = async () => {
     const json = JSON.stringify(positions, null, 2);
-    await SecureStore.setItemAsync("@criptonow:last_export", json); // demonstra expo-secure-store
-    Alert.alert("Exportado", "A carteira foi salva localmente (SecureStore). Você pode copiar pelo app.");
+    // SecureStore não está disponível no web — usamos fallback para AsyncStorage quando em web
+    if (Platform.OS !== 'web') {
+      try {
+        const SecureStore = await import('expo-secure-store');
+        await SecureStore.setItemAsync("@criptonow:last_export", json);
+        Alert.alert("Exportado", "A carteira foi salva localmente (SecureStore). Você pode copiar pelo app.");
+        return;
+      } catch (e) {
+        console.warn('SecureStore falhou (não crítico):', e);
+      }
+    }
+    // fallback web
+    await AsyncStorage.setItem('@criptonow:last_export_web', json);
+    Alert.alert("Exportado", "A carteira foi salva localmente (AsyncStorage web). Você pode copiar pelo app.");
   };
 
   const clear = async () => {
@@ -535,7 +511,6 @@ function WalletScreen() {
       <View style={{ padding: 16 }}>
         <Text style={styles.title}>Carteira Simulada</Text>
         <Text style={styles.subtitle}>Posições adicionadas localmente</Text>
-
         {loading ? <ActivityIndicator style={{ marginTop: 12 }} /> : null}
 
         <View style={{ height: 12 }} />
@@ -575,11 +550,9 @@ function WalletScreen() {
 function ProfileScreen() {
   const [expoId, setExpoId] = useState<string | null>(null);
 
-  // demonstrar uso de Constants + SecureStore
   useEffect(() => {
     (async () => {
-setExpoId(Constants.expoConfig?.slug ?? "unknown");
-
+      setExpoId(Constants.expoConfig?.slug ?? "unknown");
     })();
   }, []);
 
@@ -599,7 +572,6 @@ setExpoId(Constants.expoConfig?.slug ?? "unknown");
 
 // 
 // ====== Components =======
-// 
 
 // Card para exibir moeda na lista
 function CoinCard({ coin, onPress, onFavorite, favorite }: { coin: Coin; onPress?: () => void; onFavorite?: () => void; favorite?: boolean }) {
@@ -625,7 +597,6 @@ function CoinCard({ coin, onPress, onFavorite, favorite }: { coin: Coin; onPress
 
 // Componente de gráfico (LineChart)
 function PriceChart({ data }: { data: number[] }) {
-  // preparar dados para o chart-kit
   const labels = data.length > 6 ? data.map((_, i) => (i % Math.ceil(data.length / 6) === 0 ? `${i}` : "")) : data.map((_, i) => `${i}`);
   const chartData = {
     labels,
@@ -645,7 +616,7 @@ function PriceChart({ data }: { data: number[] }) {
         backgroundGradientFrom: "#030712",
         backgroundGradientTo: "#030712",
         decimalPlaces: 2,
-        color: (opacity = 1) => `rgba(99,102,241, ${opacity})`, // linha
+        color: (opacity = 1) => `rgba(99,102,241, ${opacity})`,
         labelColor: (opacity = 1) => `rgba(148,163,184, ${opacity})`,
         propsForBackgroundLines: { strokeDasharray: "" },
       }}
@@ -677,7 +648,6 @@ function formatShortNumber(num: number) {
 
 
 // *Estilos*
-
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#030712" },
@@ -718,11 +688,10 @@ const styles = StyleSheet.create({
   positionRow: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: "#071129" },
 
   largePrice: { 
-    fontSize: 40,             // Escolha o tamanho de fonte desejado
-    fontWeight: 'bold',       // Escolha o peso da fonte desejado
-    color: '#333',            // Escolha a cor desejada
+    fontSize: 40,
+    fontWeight: 'bold',
+    color: '#fff',
     marginTop: 10,
     marginBottom: 5,
   },
 });
-
