@@ -1,7 +1,7 @@
 {
   "name": "criptonow",
   "type": "module",
-  "main": "index.tsx",
+  "main": "App.tsx",
   "version": "1.0.0",
   "scripts": {
     "start": "expo start",
