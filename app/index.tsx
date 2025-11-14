@@ -56,7 +56,7 @@ type Coin = {
 };
 
 // ---------- Constantes ----------
-const COINGECKO_BASE = "https://api.coingecko.com/api/v3";
+const COINGECKO_BASE = "https://cors.isomorphic-git.org/https://api.coingecko.com/api/v3";
 const STORAGE_POSITIONS = "@criptonow:positions";
 const STORAGE_FAVORITES = "@criptonow:favorites";
 const SCREEN_WIDTH = Dimensions.get("window").width;
