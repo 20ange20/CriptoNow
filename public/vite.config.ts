@@ -3,10 +3,11 @@ import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
+  base: '/CryptoNow/', 
+
   plugins: [
     react(),
 
-    // Plugin PWA
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'robots.txt'],
@@ -18,7 +19,7 @@ export default defineConfig({
         theme_color: '#253248',
         background_color: '#253248',
         display: 'standalone',
-        start_url: '/',
+        start_url: '/CryptoNow/', 
         icons: [
           {
             src: 'icons/icon-192.png',
@@ -39,7 +40,6 @@ export default defineConfig({
         ],
       },
 
-      // gera o service worker automaticamente
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
       },

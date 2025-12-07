@@ -91,7 +91,6 @@ const Chart: React.FC<ChartProps> = ({ coin }) => {
         horzLines: { color: '#334158' },
       },
       crosshair: { mode: CrosshairMode.Normal },
-      // ❌ REMOVIDO: priceScale aqui não existe!
       timeScale: { borderColor: '#485c7b' },
     });
 
@@ -107,7 +106,6 @@ const Chart: React.FC<ChartProps> = ({ coin }) => {
       wickUpColor: '#838ca1',
     });
 
-    // ✔️ APLICAÇÃO CORRETA DO BORDER DA ESCALA
     chart.priceScale('right').applyOptions({
       borderColor: '#485c7b',
     });
