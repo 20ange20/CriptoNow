@@ -1,49 +1,57 @@
-# Getting Started with Create React App
+# CryptoNow
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## 🔎 Sobre o Projeto  
+CryptoNow é um aplicativo mobile (React Native + Expo) para monitoramento em tempo real de criptomoedas: Bitcoin e Litecoin.
+Ele permite acompanhar preços, ver gráficos históricos, e comparar dados de diferentes moedas, tudo de forma prática — ideal para quem quer acompanhar o mercado cripto sem complicação.
 
-## Available Scripts
+## 🛠 Tecnologias Utilizadas  
+- **React Native** — framework para desenvolvimento mobile multiplataforma  
+- **Expo** — simplifica o setup e execução do app no iOS / Android  
+- **TypeScript** — escrita de código com tipagem, para maior segurança e robustez  
 
-In the project directory, you can run:
+## 📚 Bibliotecas / Módulos Importados  
+(supondo uso típico — adapte conforme seu `package.json`)  
+- `lightweight-charts` — fornece os gráficos de preço e candle, responsável pela renderização dos gráficos históricos.  
+- `axios` (ou módulo HTTP equivalente) — para fazer requisições HTTP à API pública de dados de criptomoedas.  
+- `react-navigation` (ou similar) — para navegação entre telas, Drawer, Tabs e Modais.  
+- `expo-status-bar` / `expo-app-loading` (ou módulos do Expo usados) — para controle da barra de status e tela de splash de carregamento.  
+- `react-native-gesture-handler` / `react-native-safe-area-context` (ou dependências do Expo/React Native necessárias) — para lidar com gestos, safe-area (notch, bordas) e bom funcionamento em diferentes dispositivos.
 
-### `yarn start`
+## 🌐 API Consumida  
+O app consome uma API pública de criptomoedas CryptoCompare via HTTP — buscando dados históricos (candle, open/high/low/close, volume), preço atual, e variações. Esses dados alimentam os gráficos e as atualizações ao vivo no app.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## 📂 Estrutura de Navegação  
+- **Drawer Navigation** — menu lateral principal onde o usuário pode acessar diferentes seções do app (por exemplo: lista de moedas, favoritos, configurações).  
+- **Tabs** — dentro do Drawer, há pelo menos duas abas (Tabs) para alternar entre diferentes visões, como “Resumo / Preço Atual” e “Histórico / Gráfico”.  
+- **Modal** — usado para diálogos, como seleção de moeda, filtros, alertas, ou exibição de detalhes extras da moeda.  
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## ✅ Funcionalidades Principais  
+- Exibição de preços de criptomoedas em tempo real  
+- Gráficos históricos (candlestick: open / high / low / close + volume)  
+- Seleção de diferentes moedas  
+- Atualização automática de preços a cada minuto
 
-### `yarn test`
+## 🚀 Como Executar o Projeto  
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```bash
+# clone este repositório
+git clone https://github.com/20ange20/CryptoNow.git
 
-### `yarn build`
+# entre na pasta do projeto
+cd CryptoNow
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+# instale as dependências
+npm install
+# ou
+yarn install
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+# Iniciar
+npm run dev
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+📝 Observações
+O app não exige chaves privadas nem wallet — é apenas de visualização/monitoramento.
 
-### `yarn eject`
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+O uso de TypeScript + tipagens ajuda a reduzir erros e facilitar manutenção.
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-[Crypto Compare](https://www.cryptocompare.com/cryptopian/api-keys).
-
+Angélica ✨

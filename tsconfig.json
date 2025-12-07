@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "allowImportingTsExtensions": true,
+    "types": ["jest", "node"],
     "target": "es5",
     "lib": [
       "dom",

@@ -1,4 +1,10 @@
-import { createChart, CrosshairMode, ISeriesApi } from 'lightweight-charts';
+import {
+  createChart,
+  CrosshairMode,
+  ISeriesApi,
+  IChartApi,
+} from 'lightweight-charts';
+
 import React from 'react';
 import { cryptoHttp } from '../../http';
 import Legend from '../Legend';
@@ -10,15 +16,14 @@ interface ChartProps {
 
 const Chart: React.FC<ChartProps> = ({ coin }) => {
   const containerRef = React.useRef<HTMLDivElement>(null);
-  const candleSeriesRef = React.useRef<ISeriesApi<"Candlestick">>();
-  const chartRef = React.useRef<any>();
+
+  const candleSeriesRef = React.useRef<ISeriesApi<'Candlestick'> | null>(null);
+  const chartRef = React.useRef<IChartApi | null>(null);
 
   const [prices, setPrices] = React.useState<any[]>([]);
   const [chartLoaded, setChartLoaded] = React.useState(false);
 
-  // ============================
-  // 1) Atualiza preço atual a cada 1 minuto
-  // ============================
+  // Atualiza preço atual a cada 1 minuto
   React.useEffect(() => {
     if (!chartLoaded) return;
 
@@ -37,7 +42,6 @@ const Chart: React.FC<ChartProps> = ({ coin }) => {
           };
 
           candleSeriesRef.current?.update(newPrice);
-
           setPrices((prev) => [...prev, newPrice]);
         });
     }, 60000);
@@ -45,9 +49,7 @@ const Chart: React.FC<ChartProps> = ({ coin }) => {
     return () => clearInterval(interval);
   }, [coin, chartLoaded]);
 
-  // ============================
-  // 2) Carrega histórico diário (300 candles)
-  // ============================
+  // Carrega histórico diário
   React.useEffect(() => {
     if (!chartLoaded) return;
 
@@ -68,22 +70,18 @@ const Chart: React.FC<ChartProps> = ({ coin }) => {
       });
   }, [coin, chartLoaded]);
 
-  // ============================
-  // 3) Reinicia preços ao trocar de moeda
-  // ============================
+  // Zera preços ao trocar moeda
   React.useEffect(() => {
     setPrices([]);
   }, [coin]);
 
-  // ============================
-  // 4) Cria o gráfico uma única vez
-  // ============================
+  // Cria o gráfico
   React.useEffect(() => {
     if (!containerRef.current) return;
 
     const chart = createChart(containerRef.current, {
       width: containerRef.current.clientWidth,
-      height: containerRef.current.clientHeight, // agora a altura virá do CSS fixo
+      height: containerRef.current.clientHeight,
       layout: {
         backgroundColor: '#253248',
         textColor: 'rgba(255,255,255,0.9)',
@@ -93,12 +91,13 @@ const Chart: React.FC<ChartProps> = ({ coin }) => {
         horzLines: { color: '#334158' },
       },
       crosshair: { mode: CrosshairMode.Normal },
-      priceScale: { borderColor: '#485c7b' },
+      // ❌ REMOVIDO: priceScale aqui não existe!
       timeScale: { borderColor: '#485c7b' },
     });
 
     chartRef.current = chart;
 
+    // Candle series
     candleSeriesRef.current = chart.addCandlestickSeries({
       upColor: '#4bffb5',
       downColor: '#ff4976',
@@ -108,15 +107,19 @@ const Chart: React.FC<ChartProps> = ({ coin }) => {
       wickUpColor: '#838ca1',
     });
 
+    // ✔️ APLICAÇÃO CORRETA DO BORDER DA ESCALA
+    chart.priceScale('right').applyOptions({
+      borderColor: '#485c7b',
+    });
+
     setChartLoaded(true);
 
-    // ============================
-    // resize automático no navegador
-    // ============================
+    // resize
     const handleResize = () => {
+      if (!containerRef.current) return;
       chart.applyOptions({
-        width: containerRef.current!.clientWidth,
-        height: containerRef.current!.clientHeight,
+        width: containerRef.current.clientWidth,
+        height: containerRef.current.clientHeight,
       });
     };
 
