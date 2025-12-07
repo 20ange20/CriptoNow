@@ -48,6 +48,10 @@ yarn install
 # Iniciar
 npm run dev
 
+#Ou
+ npm install -g serve
+serve -s dist
+
 📝 Observações
 O app não exige chaves privadas nem wallet — é apenas de visualização/monitoramento.
 
